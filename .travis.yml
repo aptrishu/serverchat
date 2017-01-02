@@ -1,0 +1,13 @@
+language: generic
+node_js:
+- '0.12'
+- '0.10'
+deploy:
+  provider: heroku
+  api_key:
+    secure: d5hjjwkYqT+PUxD5n+MxEck9ZfvxMuaxFL1L+LKKmmelwlzi83N0mKZ1Xm7feCOAKSymRHKq+1baGe6CjbQfNN80B5+BbfGxUuLd0JgaB+76Xq/j/O19K6HWm++0EvU+LOPR2TFkFb1psYUKSm/+pWrr6AIYxozzJb5bjEl0S7F5oIKpbWVmz6ldjLqO7FySl/u1VC3E83drymNDnSbvw036+RW0LZuNfZxYR1IAtUKQGdU11baHrJfHjaYyWFx9nbau7+H5TXW5jfHAK7QbcVYHcYHRzq4uCpzSwPanz34ceHvH7wi9PC77rIzSBnoVm38s1RIDFwOc1dpOVraPVXgffLX8WLkigg74bSjoj202j3sAb5ChK8fTAEigL8qPSyqPrNOS6sbVw5+gJVUOMPPNF3lad0Sp31CaDb2RVtKhA7Bo4zWtLcgaYnrL9RR5cxacQ3BY1UPCWpZF/9JxFNrTje6a/BJC29XdkhtC5VY0Sf1PlawtlmjfLdZAmXmpLxZyi/1Lz/whxiD1tfYV8jG+Bsxy2juPWduN4vD2Xeg5+UhfD5Si3y3xqIokHuFRCsceXgERaA+PdIVmlyol/pQhnNBD3MKYDnsP+EbkH8iP1Ljpsbtoh/F+3F5QUGBMVcGv7/8Ma4Dp295lSSP90c7ephnHfmKzUw5yOig9WiY=
+  app: chatsserver
+  on:
+    repo: aptrishu/serverchat
+services: docker
+script: docker run -v=$(pwd):/app --workdir=/app coala/base coala --ci

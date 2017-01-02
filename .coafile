@@ -1,0 +1,4 @@
+[default]
+bears = SpaceConsistencyBear
+files = app.js,index.html,.travis.yml,package.json
+use_spaces = yes
