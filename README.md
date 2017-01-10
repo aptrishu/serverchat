@@ -1,6 +1,8 @@
 [![Build Status](https://travis-ci.org/aptrishu/serverchat.svg?branch=master)](https://travis-ci.org/aptrishu/serverchat)  
 A cross browser chat app  
 
+live instance at - https://chatsserver.herokuapp.com
+
 **Steps to run it locally -**    
 1. Install NodeJS and npm  
 2. Run 'npm install -d', It'll create the node_modules(dependencies required) folder from package.json  
