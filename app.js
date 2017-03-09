@@ -16,6 +16,17 @@ var usernames = {};
 
 var rooms = ['room1','room2','room3'];
 
+var onlineMembers = {};
+
+function showOnlineMembersInTheRoom(socket){ // shows the members already present in the room at the time of joining
+    var clients = onlineMembers[socket.room];
+    for(i=0;clients!=null && i<clients.length;i++){
+        socket.emit('updatechat', 'SERVER', clients[i] + ' is also present in this room');
+    }
+    if(onlineMembers[socket.room] == undefined) onlineMembers[socket.room] = [];
+    onlineMembers[socket.room].push(socket.username); // add the username of the current socket in the list of members present in the room
+}
+
 io.sockets.on('connection', function (socket) {
 
     socket.on('adduser', function(username){
@@ -24,6 +35,7 @@ io.sockets.on('connection', function (socket) {
         usernames[username] = username;
         socket.join('room1');
         socket.emit('updatechat', 'SERVER', 'you have connected to room1');
+        showOnlineMembersInTheRoom(socket);
         socket.broadcast.to('room1').emit('updatechat', 'SERVER', username + ' has connected to this room');
         socket.emit('updaterooms', rooms, 'room1');
     });
@@ -36,21 +48,24 @@ io.sockets.on('connection', function (socket) {
         socket.leave(socket.room);
         socket.join(newroom);
         socket.emit('updatechat', 'SERVER', 'you have connected to '+ newroom);
-        socket.broadcast.to(socket.room).emit('updatechat', 'SERVER', socket.username+' has left this room');
 
+        socket.broadcast.to(socket.room).emit('updatechat', 'SERVER', socket.username+' has left this room');
+        var oldroom = socket.room;
         socket.room = newroom;
         socket.broadcast.to(newroom).emit('updatechat', 'SERVER', socket.username+' has joined this room');
+
+        var index = onlineMembers[oldroom].indexOf(socket.username);
+        if(index>-1) onlineMembers[oldroom].splice(index,1);
+        showOnlineMembersInTheRoom(socket);
+
         socket.emit('updaterooms', rooms, newroom);
     });
 
-
     socket.on('disconnect', function(){
+        var index = onlineMembers[socket.room].indexOf(socket.username);
+        if(index>-1) onlineMembers[socket.room].splice(index,1);
 
-        delete usernames[socket.username];
-
-        io.sockets.emit('updateusers', usernames);
-
-        socket.broadcast.emit('updatechat', 'SERVER', socket.username + ' has disconnected');
+        socket.broadcast.to(socket.room).emit('updatechat', 'SERVER', socket.username + ' has disconnected');
         socket.leave(socket.room);
     });
 });
