@@ -1,54 +1,83 @@
-<script src="/socket.io/socket.io.js"></script>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script>
-<script>
-    var socket = io.connect();
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Chat Application</title>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+        <script src="/socket.io/socket.io.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+        <script>
+            var socket = io.connect();
+            var privateRooms= [];
+            socket.on('connect', function(){
+                var name = prompt("What's your name?");
+                while(name.length == 0) name = prompt("What's your name?");
+                socket.emit('adduser', name);
+            });
 
-    socket.on('connect', function(){
-        socket.emit('adduser', prompt("What's your name baby?"));
-    });
+            socket.on('updatechat', function (username, data) {
+                $('#conversation').append('<b>'+username + ':</b> ' + data + '<br>');
+            });
 
-    socket.on('updatechat', function (username, data) {
-        $('#conversation').append('<b>'+username + ':</b> ' + data + '<br>');
-    });
+            socket.on('updaterooms', function(rooms, current_room) {
+                $('#rooms').empty();
+                $.each(rooms, function(key, value) {
+                    if(value == current_room){
+                        $('#rooms').append('<div>' + value + '</div>');
+                    }
+                    else {
+                        $('#rooms').append('<div><a href="#" onclick="switchRoom(\''+value+'\')">' + value + '</a></div>');
+                    }
+                });
+                $.each(privateRooms, function(key, value) {
+                    if(value == current_room){
+                        $('#rooms').append('<div>' + value + '</div>');
+                    }
+                    else {
+                        $('#rooms').append('<div><a href="#" onclick="switchRoom(\''+value+'\')">' + value + '</a></div>');
+                    }
+                });
+            });
 
-    socket.on('updaterooms', function(rooms, current_room) {
-        $('#rooms').empty();
-        $.each(rooms, function(key, value) {
-            if(value == current_room){
-                $('#rooms').append('<div>' + value + '</div>');
+            function switchRoom(room){
+                socket.emit('switchRoom', room);
             }
-            else {
-                $('#rooms').append('<div><a href="#" onclick="switchRoom(\''+value+'\')">' + value + '</a></div>');
+
+            function JoinPrivateRoom(){
+                var roomName = prompt("New room name?");
+                if(roomName==null) return;
+                privateRooms.push(roomName);
+                socket.emit('switchRoom', roomName);
             }
-        });
-    });
 
-    function switchRoom(room){
-        socket.emit('switchRoom', room);
-    }
+            $(function(){
+                $('#datasend').click( function() {
+                    var message = $('#data').val();
+                    $('#data').val('');
+                    socket.emit('sendchat', message);
+                    $('#data').focus();
+                });
 
-    $(function(){
-        $('#datasend').click( function() {
-            var message = $('#data').val();
-            $('#data').val('');
-            socket.emit('sendchat', message);
-        });
-
-        $('#data').keypress(function(e) {
-            if(e.which == 13) {
-                $(this).blur();
-                $('#datasend').focus().click();
-            }
-        });
-    });
-
-</script>
-<div style="float:left;width:100px;border-right:1px solid black;height:300px;padding:10px;overflow:scroll-y;">
-    <b>ROOMS</b>
-    <div id="rooms"></div>
-</div>
-<div style="float:left;width:300px;height:250px;overflow:scroll-y;padding:10px;">
-    <div id="conversation"></div>
-    <input id="data" style="width:200px;" />
-    <input type="button" id="datasend" value="send" />
-</div>
+                $('#data').keypress(function(e) {
+                    if(e.which == 13) {
+                        $(this).blur();
+                        $('#datasend').focus().click();
+                    }
+                });
+            });
+        </script>
+    </head>
+    <body>
+        <div style="float:left;width:200px;border-right:1px solid black;height:300px;padding:10px;overflow:scroll-y;">
+            <h3>ROOMS</h3>
+            <div id="rooms"></div>
+            <hr>
+            <div><a href="#" onClick="JoinPrivateRoom()">Join a private Room</a></div>
+        </div>
+        <div style="float:left;width:300px;height:250px;overflow:scroll-y;padding:10px;">
+            <div id="conversation"></div>
+            <input id="data" style="width:200px;" />
+            <input type="button" id="datasend" value="send" />
+        </div>
+    </body>
+</html>
