@@ -16,7 +16,16 @@ var usernames = {};
 
 var rooms = ['room1','room2','room3'];
 
-var onlineMembers = {};
+var onlineMembers = {}; // {'roomname': ['user1','user2',...] }
+
+var roomSizes = {};
+
+function updateRoomSize(){
+    roomSizes = {'room1': 0, 'room2': 0, 'room3': 0};
+    for(var room in onlineMembers){
+        roomSizes[room] = onlineMembers[room].length;
+    }
+}
 
 function showOnlineMembersInTheRoom(socket){ // shows the members already present in the room at the time of joining
     var clients = onlineMembers[socket.room];
@@ -37,7 +46,9 @@ io.sockets.on('connection', function (socket) {
         socket.emit('updatechat', 'SERVER', 'you have connected to room1');
         showOnlineMembersInTheRoom(socket);
         socket.broadcast.to('room1').emit('updatechat', 'SERVER', username + ' has connected to this room');
-        socket.emit('updaterooms', rooms, 'room1');
+        updateRoomSize();
+        socket.broadcast.emit('updaterooms', rooms, roomSizes);
+        socket.emit('updaterooms', rooms, roomSizes);
     });
 
     socket.on('sendchat', function (data) {
@@ -58,7 +69,9 @@ io.sockets.on('connection', function (socket) {
         if(index>-1) onlineMembers[oldroom].splice(index,1);
         showOnlineMembersInTheRoom(socket);
 
-        socket.emit('updaterooms', rooms, newroom);
+        updateRoomSize();
+        socket.broadcast.emit('updaterooms', rooms, roomSizes);
+        socket.emit('updaterooms', rooms, roomSizes);
     });
 
     socket.on('disconnect', function(){

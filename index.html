@@ -9,38 +9,44 @@
         <script>
             var socket = io.connect();
             var privateRooms= [];
+            var currentRoom= "";
             socket.on('connect', function(){
                 var name = prompt("What's your name?");
                 while(name.length == 0) name = prompt("What's your name?");
                 socket.emit('adduser', name);
+                currentRoom = "room1";
             });
 
             socket.on('updatechat', function (username, data) {
                 $('#conversation').append('<b>'+username + ':</b> ' + data + '<br>');
             });
 
-            socket.on('updaterooms', function(rooms, current_room) {
+            socket.on('updaterooms', function(rooms, roomSizes) {
                 $('#rooms').empty();
                 $.each(rooms, function(key, value) {
-                    if(value == current_room){
-                        $('#rooms').append('<div>' + value + '</div>');
+                    if(value == currentRoom){
+                        $('#rooms').append('<div>' + value + "(" + roomSizes[value] + ')' + '</div>');
                     }
-                    else {
-                        $('#rooms').append('<div><a href="#" onclick="switchRoom(\''+value+'\')">' + value + '</a></div>');
+                    else{
+                        $('#rooms').append('<div><a href="#" onclick="switchRoom(\''+value+'\')">' + value + "(" + roomSizes[value] + ')' + '</a></div>');
                     }
                 });
+                if(privateRooms.length!=0){
+                    $('#rooms').append('<div>' + '<h4>Private Room:</h4>' + '</div>');
+                }
                 $.each(privateRooms, function(key, value) {
-                    if(value == current_room){
-                        $('#rooms').append('<div>' + value + '</div>');
+                    if(value == currentRoom){
+                        $('#rooms').append('<div>' + value + "(" + roomSizes[value] + ')' + '</div>');
                     }
-                    else {
-                        $('#rooms').append('<div><a href="#" onclick="switchRoom(\''+value+'\')">' + value + '</a></div>');
+                    else if(roomSizes[value]!=0){
+                        $('#rooms').append('<div><a href="#" onclick="switchRoom(\''+value+'\')">' + value + "(" + roomSizes[value] + ')' + '</a></div>');
                     }
                 });
             });
 
             function switchRoom(room){
                 socket.emit('switchRoom', room);
+                currentRoom = room;
             }
 
             function JoinPrivateRoom(){
@@ -48,6 +54,7 @@
                 if(roomName==null) return;
                 privateRooms.push(roomName);
                 socket.emit('switchRoom', roomName);
+                currentRoom = roomName;
             }
 
             $(function(){
@@ -69,7 +76,7 @@
     </head>
     <body>
         <div style="float:left;width:200px;border-right:1px solid black;height:300px;padding:10px;overflow:scroll-y;">
-            <h3>ROOMS</h3>
+            <h4>Public Rooms:</h4>
             <div id="rooms"></div>
             <hr>
             <div><a href="#" onClick="JoinPrivateRoom()">Join a private Room</a></div>
