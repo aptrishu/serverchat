@@ -75,9 +75,9 @@ io.sockets.on('connection', function (socket) {
     });
 
     socket.on('disconnect', function(){
-        var index = onlineMembers[socket.room].indexOf(socket.username);
+        var index = -1;
+        if(onlineMembers[socket.room]!=null && onlineMembers[socket.room].length>0) index = onlineMembers[socket.room].indexOf(socket.username);
         if(index>-1) onlineMembers[socket.room].splice(index,1);
-
         socket.broadcast.to(socket.room).emit('updatechat', 'SERVER', socket.username + ' has disconnected');
         socket.leave(socket.room);
     });

@@ -3,6 +3,37 @@
     <head>
         <title>Chat Application</title>
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+        <style type="text/css">
+            .navbar{
+                padding: 10px;
+                border: 0px;
+                border-radius: 0px;
+                margin: 0px;
+            }
+            .container-fluid{
+                border: 0px;
+                border-radius: 0px;
+            }
+            .jumbo-container{
+                padding: 0px;
+            }
+            .jumbotron{
+                margin: 0px;
+                border: 0px;
+                border-radius: 0px;
+                height: 250px;
+            }
+            #name{
+                margin: 5px;
+            }
+            #data{
+                margin-bottom: 5px;
+            }
+            #datasend{
+                width: 90px;
+                margin-bottom: 5px;
+            }
+        </style>
         <script src="/socket.io/socket.io.js"></script>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
@@ -11,10 +42,7 @@
             var privateRooms= [];
             var currentRoom= "";
             socket.on('connect', function(){
-                var name = prompt("What's your name?");
-                while(name.length == 0) name = prompt("What's your name?");
-                socket.emit('adduser', name);
-                currentRoom = "room1";
+                //do nothing for now
             });
 
             socket.on('updatechat', function (username, data) {
@@ -43,6 +71,13 @@
                     }
                 });
             });
+
+            function startChat(){
+                var name = $('#name').val();
+                socket.emit('adduser', name);
+                $('#name-input').hide();
+                $('#chat-interface').show();
+            }
 
             function switchRoom(room){
                 socket.emit('switchRoom', room);
@@ -75,16 +110,49 @@
         </script>
     </head>
     <body>
-        <div style="float:left;width:200px;border-right:1px solid black;height:300px;padding:10px;overflow:scroll-y;">
-            <h4>Public Rooms:</h4>
-            <div id="rooms"></div>
-            <hr>
-            <div><a href="#" onClick="JoinPrivateRoom()">Join a private Room</a></div>
+        <nav class="navbar navbar-inverse">
+          <div class="container-fluid">
+            <div class="navbar-header">
+              <a class="navbar-brand" href="#">Chat Application</a>
+            </div>
+          </div>
+        </nav>
+        <div id="name-input">
+            <div class="container-fluid text-center jumbo-container">
+                <div class="jumbotron">
+                    <h3>Enter your name:</h3>
+                    <form class="form-inline" action="" method="">
+                        <div class="form-group">
+                            <input type="text" id="name" class="form-control">
+                            <input onClick="startChat()" value="Join Chat room" class="btn btn-primary" id="join-button">
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
-        <div style="float:left;width:300px;height:250px;overflow:scroll-y;padding:10px;">
-            <div id="conversation"></div>
-            <input id="data" style="width:200px;" />
-            <input type="button" id="datasend" value="send" />
+        <div id="chat-interface" style="display: none;">
+            <div class="container-fluid">
+                <div class="row content">
+                    <div class="col-sm-3 sidenav">
+                        <h4>Public Rooms:</h4>
+                        <div id="rooms"></div>
+                        <hr>
+                        <div><a href="#" onClick="JoinPrivateRoom()">Join a private Room</a></div>
+                        <hr>
+                    </div>
+                    <div class="col-sm-9">
+                        <div id="conversation"><h3>Chats:</h3></div>
+                        <form class="form-inline" action="" method="">
+                            <div class="form-group">
+                                <input id="data" style="width:200px;" class="form-control">
+                                <input class="btn btn-primary" id="datasend" value="send">
+                            </div>
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+
         </div>
     </body>
 </html>
